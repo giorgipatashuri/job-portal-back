@@ -1,3 +1,4 @@
+import { Role } from 'src/utils/role.enum';
 import {
   Column,
   CreateDateColumn,
@@ -16,7 +17,7 @@ export class User {
   firstname: string;
 
   @Column()
-  username: string;
+  lastname: string;
 
   @Column()
   password: string;
@@ -24,17 +25,11 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ default: Role.USER })
   role: string;
 
-  @Column()
+  @Column({ default: false })
   isVerified: boolean;
-
-  @Column({ type: 'bigint' })
-  otp: number;
-
-  @Column({ type: 'timestamp' })
-  otpValidUntil: Date;
 
   @CreateDateColumn()
   createdAt: Date;

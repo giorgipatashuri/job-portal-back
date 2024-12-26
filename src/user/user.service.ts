@@ -15,12 +15,15 @@ export class UserService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
-  create(createUserDto: CreateUserDto) {
-    const existingUser = this.userRepository.findBy({
+  async create(createUserDto: CreateUserDto) {
+    const existingUser = await this.userRepository.findOneBy({
       email: createUserDto.email,
     });
     if (existingUser) throw new ConflictException('User already Exists');
 
-    return this.userRepository.save(createUserDto);
+    return await this.userRepository.save(createUserDto);
+  }
+  async findByMail(email: string) {
+    return this.userRepository.findOneBy({ email });
   }
 }
