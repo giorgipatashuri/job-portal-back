@@ -8,6 +8,7 @@ import by.giorgi.jobportalback.model.entity.User;
 import by.giorgi.jobportalback.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,8 @@ public class AuthService {
                 .name(registerRequest.getName())
                 .email(registerRequest.getEmail())
                 .password(registerRequest.getPassword())
+                .username(registerRequest.getUsername())
+                .lastname(registerRequest.getLastname())
                 .build();
         userRepository.save(user);
 
@@ -31,13 +34,20 @@ public class AuthService {
 
         return new AuthResp(token);
     }
-    public AuthResp login(UserLoginReq loginRequest) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+    public AuthResp login(UserLoginReq userLoginReq) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(userLoginReq.getUsername(), userLoginReq.getPassword())
+            );
 
-        User user = userRepository.findByUsername(loginRequest.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
+            User user = userRepository.findByUsername(userLoginReq.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
 
-        String token = jwtService.generateToken(user);
 
-        return new AuthResp(token);
+            String token = jwtService.generateToken(user);
+
+            return new AuthResp(token);
+        } catch (Exception e) {
+            throw new BadCredentialsException("Invalid username or password.");
+        }
     }
 }

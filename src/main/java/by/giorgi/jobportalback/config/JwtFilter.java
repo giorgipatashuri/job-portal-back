@@ -26,24 +26,34 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final UserService userService;
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+
         String authHeader = request.getHeader("Authorization");
+        String token = null;
+        String username = null;
 
-        if(authHeader != null && authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-        }
-
-        String token = authHeader != null ? authHeader.replace("Bearer ", "") : null;
-        String username = jwtService.extractUserName(token);
-        if(username != null || SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails= userService.loadUserByUsername(username);
-            if(jwtService.isTokenValid(token, userDetails)) {
-               UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
-               authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-               SecurityContextHolder.getContext().setAuthentication(authToken);
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7); // Extract the token after "Bearer "
+            try {
+                username = jwtService.extractUserName(token);
+            } catch (Exception e) {
+                System.out.println("Error extracting username from token: " + e.getMessage());
             }
-            filterChain.doFilter(request, response);
         }
 
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = userService.loadUserByUsername(username);
+
+            if (jwtService.isTokenValid(token, userDetails)) {
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        }
+
+        filterChain.doFilter(request, response);
     }
+
 }

@@ -28,14 +28,25 @@ public class WebSecurityConfig {
     private final JwtFilter jwtFilter;
 
 
+//    @Bean
+//    protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for APIs
+//                .authorizeHttpRequests(req -> req
+//                        .anyRequest().permitAll() // Permit all requests without authentication
+//                );
+//
+//        return http.build();
+//    }
+
     @Bean
     protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers("/login/**","/register/**").permitAll()
-                                .anyRequest().authenticated()
-                ).userDetailsService(userService)
+                        req.requestMatchers("auth/**").permitAll().anyRequest().authenticated()
+                )
+                .userDetailsService(userService)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

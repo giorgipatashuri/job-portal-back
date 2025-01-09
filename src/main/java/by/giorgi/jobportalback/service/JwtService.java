@@ -18,8 +18,8 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-    @Value("${jwt.secret}")
-    private String jwtSigningKey;
+
+    private String jwtSigningKey = "q8wEC2NIJokjfsdks83bd7NRmFq9u6J+QxF0dBNKpRs=;";
 
 
     public String extractUserName(String token) {
