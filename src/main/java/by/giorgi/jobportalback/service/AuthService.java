@@ -35,19 +35,13 @@ public class AuthService {
         return new AuthResp(token);
     }
     public AuthResp login(UserLoginReq userLoginReq) {
-        try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(userLoginReq.getUsername(), userLoginReq.getPassword())
             );
-
             User user = userRepository.findByUsername(userLoginReq.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
 
-
             String token = jwtService.generateToken(user);
-
+            System.out.println("test in login");
             return new AuthResp(token);
-        } catch (Exception e) {
-            throw new BadCredentialsException("Invalid username or password.");
-        }
     }
 }
