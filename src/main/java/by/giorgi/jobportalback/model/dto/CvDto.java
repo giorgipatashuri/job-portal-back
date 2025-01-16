@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,8 +16,8 @@ public class CvDto {
     private String jobTitle;
     private String phone;
     private String email;
-    private List<SkillDTO> skills;
-    private List<ExperienceDTO> experiences;
-    private List<EducationDTO> education;
+    private List<SkillDto> skills;
+    private List<ExperienceDto> experiences;
+    private List<EducationDto> education;
 }
 
