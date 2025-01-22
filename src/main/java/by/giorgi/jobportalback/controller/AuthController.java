@@ -8,6 +8,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +36,9 @@ public class AuthController {
         AuthResp authResp = authService.login(userLoginReq);
         return ResponseEntity.status(HttpStatus.CREATED).body(authResp);
     }
-
+    @GetMapping("/test")
+    public String test( @AuthenticationPrincipal UserDetails userDetails ) {
+        return userDetails.getUsername();
+    }
 
 }

@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
+
 @Service
 @AllArgsConstructor
 public class AuthService {
@@ -55,8 +57,6 @@ public class AuthService {
     }
     public AuthResp login(UserLoginReq userLoginReq) {
         try {
-            System.out.println(userLoginReq.getEmail());
-            System.out.println(userLoginReq.getPassword());
 
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -65,7 +65,7 @@ public class AuthService {
                     )
             );
 
-            System.out.println("test");
+
             User authenticatedUser = (User) authentication.getPrincipal();
 
             System.out.println(authenticatedUser);
@@ -76,5 +76,8 @@ public class AuthService {
         } catch (AuthenticationException ex) {
             throw new BadCredentialsException("Invalid email or password", ex);
         }
+    }
+    public String getVerificationUrl(String key, String type) {
+        return fromCurrentContextPath().path("/user/verify/" + type + "/" + key).toUriString();
     }
 }
