@@ -10,6 +10,8 @@ import by.giorgi.jobportalback.model.entity.User;
 import by.giorgi.jobportalback.repository.CvRepository;
 import by.giorgi.jobportalback.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,5 +43,13 @@ public class CvService {
         Cv savedCv = cvRepository.save(cv);
         return cvMapper.cvToCVDto(savedCv);
     }
-
+    public CvDto getCvById(Long id) {
+        Cv cv = cvRepository.findById(id).orElseThrow(()-> new RuntimeException("Cv not found"));
+        return cvMapper.cvToCVDto(cv);
+    }
+    public List<CvDto> getAllUserCvs(UserDetails userDetails){
+        User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(()-> new RuntimeException("User not found"));
+        List<Cv> cvs = cvRepository.findByUser(user);
+        return cvMapper.cvsToCvDtos(cvs);
+    }
 }

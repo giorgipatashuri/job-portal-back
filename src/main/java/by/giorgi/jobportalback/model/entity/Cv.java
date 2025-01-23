@@ -24,6 +24,9 @@ public class Cv  {
     @Column(nullable = false)
     private String firstName;
 
+//    @Column(nullable = false)
+//    private String title;
+
     @Column(nullable = false)
     private String lastName;
 
@@ -35,6 +38,10 @@ public class Cv  {
 
     @Column(nullable = false)
     private String email;
+
+    @Column(columnDefinition = "TEXT")
+    private String summary;
+    
 
     @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Skill> skills = new ArrayList<>();
@@ -48,6 +55,7 @@ public class Cv  {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
     @CreatedDate
     private LocalDateTime createdAt;
 

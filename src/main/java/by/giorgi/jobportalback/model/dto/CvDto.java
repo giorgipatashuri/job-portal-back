@@ -11,11 +11,13 @@ import java.util.List;
 @AllArgsConstructor
 public class CvDto {
     private Long id;
+//    private String title;
     private String firstName;
     private String lastName;
     private String jobTitle;
     private String phone;
     private String email;
+    private String summary;
     private List<SkillDto> skills;
     private List<ExperienceDto> experiences;
     private List<EducationDto> education;
