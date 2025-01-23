@@ -1,6 +1,8 @@
 package by.giorgi.jobportalback.service;
 
 
+import by.giorgi.jobportalback.mapper.BaseMapper;
+import by.giorgi.jobportalback.model.dto.UserDto;
 import by.giorgi.jobportalback.model.dto.request.UserLoginReq;
 import by.giorgi.jobportalback.model.dto.response.AuthResp;
 import by.giorgi.jobportalback.model.dto.request.UserRegisterReq;
@@ -28,6 +30,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+    private final BaseMapper baseMapper;
 
 
     public AuthResp register(UserRegisterReq registerRequest) {
@@ -76,6 +79,10 @@ public class AuthService {
         } catch (AuthenticationException ex) {
             throw new BadCredentialsException("Invalid email or password", ex);
         }
+    }
+    public UserDto getMe(String username){
+        User user = userRepository.findByUsername(username).orElseThrow(()-> new UsernameNotFoundException(username));
+        return baseMapper.userToUserDto(user);
     }
     public String getVerificationUrl(String key, String type) {
         return fromCurrentContextPath().path("/user/verify/" + type + "/" + key).toUriString();

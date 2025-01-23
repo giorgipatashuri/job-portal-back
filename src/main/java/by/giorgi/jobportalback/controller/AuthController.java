@@ -1,5 +1,7 @@
 package by.giorgi.jobportalback.controller;
 
+import by.giorgi.jobportalback.model.dto.CvDto;
+import by.giorgi.jobportalback.model.dto.UserDto;
 import by.giorgi.jobportalback.model.dto.request.UserLoginReq;
 import by.giorgi.jobportalback.model.dto.request.UserRegisterReq;
 import by.giorgi.jobportalback.model.dto.response.AuthResp;
@@ -15,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
@@ -29,13 +33,18 @@ public class AuthController {
         return ResponseEntity.ok(authResp);
 
     }
-
-
     @PostMapping("/login")
     public ResponseEntity<AuthResp> login(@Valid @RequestBody UserLoginReq userLoginReq) {
         AuthResp authResp = authService.login(userLoginReq);
         return ResponseEntity.status(HttpStatus.CREATED).body(authResp);
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> me(@AuthenticationPrincipal UserDetails userDetails) {
+        UserDto user = authService.getMe(userDetails.getUsername());
+        return ResponseEntity.ok(user);
+    }
+
     @GetMapping("/test")
     public String test( @AuthenticationPrincipal UserDetails userDetails ) {
         return userDetails.getUsername();
