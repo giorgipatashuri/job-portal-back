@@ -11,7 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 public class CvDto {
     private Long id;
-//    private String title;
     private String firstName;
     private String lastName;
     private String jobTitle;

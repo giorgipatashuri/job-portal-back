@@ -52,4 +52,17 @@ public class CvService {
         List<Cv> cvs = cvRepository.findByUser(user);
         return cvMapper.cvsToCvDtos(cvs);
     }
+    public void deleteCvById(Long id, UserDetails userDetails) {
+
+        User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Cv cv = cvRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("CV not found"));
+
+        if (!cv.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized: You do not own this CV");
+        }
+        cvRepository.deleteById(id);
+    }
 }

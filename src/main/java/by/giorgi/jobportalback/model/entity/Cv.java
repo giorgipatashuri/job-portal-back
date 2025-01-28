@@ -24,9 +24,6 @@ public class Cv  {
     @Column(nullable = false)
     private String firstName;
 
-//    @Column(nullable = false)
-//    private String title;
-
     @Column(nullable = false)
     private String lastName;
 

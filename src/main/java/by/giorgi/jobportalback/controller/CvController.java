@@ -41,4 +41,14 @@ public class CvController {
         List<CvDto> cvs = cvService.getAllUserCvs(userDetails);
         return ResponseEntity.ok(cvs);
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteCv(@PathVariable Long id,@AuthenticationPrincipal UserDetails userDetails) {
+
+        try {
+            cvService.deleteCvById(id,userDetails);
+            return ResponseEntity.ok("CV deleted successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        }
+    }
 }
