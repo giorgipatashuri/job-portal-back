@@ -28,9 +28,9 @@ public class AuthController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResp> register(@Valid @RequestBody UserRegisterReq userRegisterReq) {
-        AuthResp authResp = authService.register(userRegisterReq);
-        return ResponseEntity.ok(authResp);
+    public ResponseEntity<String> register(@Valid @RequestBody UserRegisterReq userRegisterReq) {
+        authService.register(userRegisterReq);
+        return ResponseEntity.ok("user registered");
 
     }
     @PostMapping("/login")
@@ -44,7 +44,11 @@ public class AuthController {
         UserDto user = authService.getMe(userDetails.getUsername());
         return ResponseEntity.ok(user);
     }
-
+    @GetMapping("/verify/{token}")
+    public ResponseEntity<AuthResp> Verify(@PathVariable String token) {
+        AuthResp authResp = authService.verifyEmail(token);
+        return ResponseEntity.status(HttpStatus.CREATED).body(authResp);
+    }
     @GetMapping("/test")
     public String test( @AuthenticationPrincipal UserDetails userDetails ) {
         return userDetails.getUsername();
