@@ -32,8 +32,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String lastname;
 
-    @Column(unique = true,nullable = false)
-    private String username;
 
     @Column(unique = true,nullable = false)
     private String email;
@@ -44,7 +42,7 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
-    private boolean verified;
+    private boolean verified = false;
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -62,7 +60,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
     @Override
