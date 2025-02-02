@@ -48,13 +48,13 @@ public class CvService {
         return cvMapper.cvToCVDto(cv);
     }
     public List<CvDto> getAllUserCvs(UserDetails userDetails){
-        User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(()-> new RuntimeException("User not found"));
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(()-> new RuntimeException("User not found"));
         List<Cv> cvs = cvRepository.findByUser(user);
         return cvMapper.cvsToCvDtos(cvs);
     }
     public void deleteCvById(Long id, UserDetails userDetails) {
 
-        User user = userRepository.findByUsername(userDetails.getUsername())
+        User user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Cv cv = cvRepository.findById(id)

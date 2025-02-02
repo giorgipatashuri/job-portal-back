@@ -26,7 +26,7 @@ public class CvController {
 //    @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<CvDto> createCv(@Valid @RequestBody CvDto cvDto, @AuthenticationPrincipal UserDetails userDetails) {
 
-        User user = userService.getUserByUsername(userDetails.getUsername());
+        User user = (User) userService.loadUserByUsername(userDetails.getUsername());
 //        User user = userService.getUserById(1L);
         System.out.println(user.getRole());
         CvDto createdCv = cvService.createCv(cvDto,user.getId());
