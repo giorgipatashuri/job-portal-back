@@ -1,5 +1,6 @@
 package by.giorgi.jobportalback.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,6 +24,7 @@ public class Skill {
     @Column(nullable = false)
     private Integer rating;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "cv_id")
     private Cv cv;
