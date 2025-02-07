@@ -1,5 +1,7 @@
 package by.giorgi.jobportalback.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -38,17 +40,20 @@ public class Cv  {
 
     @Column(columnDefinition = "TEXT")
     private String summary;
-    
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Skill> skills = new ArrayList<>();
+    private List<Skill> skills;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Experience> experiences = new ArrayList<>();
+    private List<Experience> experiences;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Education> education = new ArrayList<>();
+    private List<Education> education;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
