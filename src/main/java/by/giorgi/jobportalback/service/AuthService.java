@@ -2,15 +2,17 @@ package by.giorgi.jobportalback.service;
 
 
 import by.giorgi.jobportalback.config.WebSocketHandler;
-import by.giorgi.jobportalback.mapper.BaseMapper;
-import by.giorgi.jobportalback.mapper.BaseMapperImpl;
 import by.giorgi.jobportalback.model.dto.UserDto;
+import by.giorgi.jobportalback.model.dto.request.CompanyRegisterReq;
 import by.giorgi.jobportalback.model.dto.request.UserLoginReq;
 import by.giorgi.jobportalback.model.dto.response.AuthResp;
 import by.giorgi.jobportalback.model.dto.request.UserRegisterReq;
+import by.giorgi.jobportalback.model.entity.Company;
 import by.giorgi.jobportalback.model.entity.User;
 import by.giorgi.jobportalback.model.enums.Role;
+import by.giorgi.jobportalback.repository.CompanyRepository;
 import by.giorgi.jobportalback.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,8 +28,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
-
 @Service
 @AllArgsConstructor
 public class AuthService {
@@ -39,8 +39,27 @@ public class AuthService {
     private final RedisTemplate<String,String> redisTemplate;
     private final MailService mailService;
     private final WebSocketHandler webSocketHandler;
+    private final CompanyRepository companyRepository;
 
+    @Transactional
+    public void registerCompany(CompanyRegisterReq companyRegisterReq) {
+        Optional<Company> company = companyRepository.findByCompanyEmail(companyRegisterReq.getCompanyEmail());
 
+        if(company.isPresent()) {
+            throw new BadCredentialsException("Email already in use");
+        }
+
+        Company newCompany = Company.builder()
+                .companyName(companyRegisterReq.getCompanyName())
+                .companyEmail(companyRegisterReq.getCompanyEmail())
+                .password(passwordEncoder.encode(companyRegisterReq.getPassword()))
+//                .description(registerRequest.getDescription())
+                .verified(false)
+                .build();
+
+        companyRepository.save(newCompany);
+        sendVerificationEmail(newCompany.getCompanyEmail(), "COMPANY");
+    }
     public void register(UserRegisterReq registerRequest) {
 
         Optional<User> user = userRepository.findByEmail(registerRequest.getEmail());
@@ -58,8 +77,25 @@ public class AuthService {
                 .build();
 
         userRepository.save(newUser);
-        sendVerificationEmail(newUser.getEmail());
+        sendVerificationEmail(newUser.getEmail(),"USER");
 
+    }
+    public AuthResp loginCompany(UserLoginReq userLoginReq) {
+        try {
+
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            userLoginReq.getEmail(),
+                            userLoginReq.getPassword()
+                    )
+            );
+
+            String token = jwtService.generateToken(authentication,"COMPANY");
+
+            return new AuthResp(token);
+        } catch (AuthenticationException ex) {
+            throw new BadCredentialsException("Invalid email or password", ex);
+        }
     }
     public AuthResp login(UserLoginReq userLoginReq) {
         try {
@@ -70,11 +106,8 @@ public class AuthService {
                             userLoginReq.getPassword()
                     )
             );
-            User authenticatedUser = (User) authentication.getPrincipal();
 
-            System.out.println(authenticatedUser);
-
-            String token = jwtService.generateToken(authenticatedUser);
+            String token = jwtService.generateToken(authentication,"USER");
 
             return new AuthResp(token);
         } catch (AuthenticationException ex) {
@@ -82,29 +115,22 @@ public class AuthService {
         }
     }
 
-    public AuthResp verifyEmail(String token) {
-        String rediskey = "verification" + token;
-        String email = redisTemplate.opsForValue().get(rediskey);
-        System.out.println(email);
+    public void verifyEmail(String token,String userType) {
+        String redisKey = "verification" + token;
+        String email = redisTemplate.opsForValue().get(redisKey);
         if (email == null) {
             throw new IllegalArgumentException("invalid or expired token");
         }
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Invalid email"));
-
-        user.setVerified(true);
-
-        userRepository.save(user);
-
-        redisTemplate.delete(rediskey);
-
-        String jwtToken = jwtService.generateToken(user);
-
-        webSocketHandler.notifyEmailVerification(email, jwtToken);
-
-        return new AuthResp(jwtToken);
+        if(userType.equals("USER")) {
+            verifyUserEmail(email, redisKey);
+        }else {
+            verifyCompanyEmail(email, redisKey);
+        }
     }
 
-
+    public Company getCompany(String userName){
+        return companyRepository.findByCompanyEmail(userName).orElseThrow(() -> new IllegalArgumentException("Invalid email"));
+    }
     public UserDto getMe(String username){
         User user = userRepository.findByEmail(username).orElseThrow(()-> new UsernameNotFoundException(username));
         System.out.println(user.getEmail());
@@ -116,11 +142,36 @@ public class AuthService {
                 .role(user.getRole())
                 .build();
     }
-    private void sendVerificationEmail(String email) {
+    private void verifyCompanyEmail(String email, String redisKey) {
+        Company company = companyRepository.findByCompanyEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid email"));
+
+        company.setVerified(true);
+        companyRepository.save(company);
+        redisTemplate.delete(redisKey);
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(company, null, company.getAuthorities());
+        String jwtToken = jwtService.generateToken(authentication, "COMPANY");
+        webSocketHandler.notifyEmailVerification(email, jwtToken);
+    }
+
+    private void verifyUserEmail(String email, String redisKey) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid email"));
+
+        user.setVerified(true);
+        userRepository.save(user);
+        redisTemplate.delete(redisKey);
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+        String jwtToken = jwtService.generateToken(authentication, "USER");
+        webSocketHandler.notifyEmailVerification(email, jwtToken);
+    }
+    private void sendVerificationEmail(String email,String userType) {
         String verificationToken = UUID.randomUUID().toString();
         redisTemplate.opsForValue().set("verification" + verificationToken,email,TOKEN_EXPIRATION_HOURS, TimeUnit.HOURS);
         try{
-            mailService.sendVerificationMail(email, verificationToken);
+            mailService.sendVerificationMail(email, verificationToken,userType);
         }catch (Exception e){
             throw new RuntimeException("Failed to send verification email");
         }
