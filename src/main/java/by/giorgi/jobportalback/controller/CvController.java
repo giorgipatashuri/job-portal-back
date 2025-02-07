@@ -2,6 +2,7 @@ package by.giorgi.jobportalback.controller;
 
 import by.giorgi.jobportalback.model.dto.CvDto;
 import by.giorgi.jobportalback.model.entity.User;
+import by.giorgi.jobportalback.repository.JobApplicationRepository;
 import by.giorgi.jobportalback.service.CvService;
 import by.giorgi.jobportalback.service.UserService;
 import jakarta.validation.Valid;
@@ -21,6 +22,7 @@ import java.util.List;
 public class CvController {
     private final CvService cvService;
     private final UserService userService;
+    private final JobApplicationRepository jobApplicationRepository;
 
     @PostMapping
 //    @PreAuthorize("hasAuthority('USER')")
@@ -28,7 +30,6 @@ public class CvController {
 
         User user = (User) userService.loadUserByUsername(userDetails.getUsername());
 //        User user = userService.getUserById(1L);
-        System.out.println(user.getRole());
         CvDto createdCv = cvService.createCv(cvDto,user.getId());
         return new ResponseEntity<>(createdCv, HttpStatus.CREATED);
     }
@@ -45,6 +46,7 @@ public class CvController {
     public ResponseEntity<String> deleteCv(@PathVariable Long id,@AuthenticationPrincipal UserDetails userDetails) {
 
         try {
+            jobApplicationRepository.deleteByCvId(id);
             cvService.deleteCvById(id,userDetails);
             return ResponseEntity.ok("CV deleted successfully");
         } catch (RuntimeException e) {
