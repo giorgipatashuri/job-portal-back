@@ -7,6 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -29,13 +30,14 @@ public class JwtService {
     private String jwtSigningKey = "q8wEC2NIJokjfsdks83bd7NRmFq9u6J+QxF0dBNKpRs=;";
 
 
-    public String generateToken(User user) {
+    public String generateToken(Authentication authentication,String userType) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", user.getRole().name());
-
+//        claims.put("role", .getRole().name());
+        claims.put("sub", authentication.getName());
+        claims.put("userType", userType);
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(user.getEmail())
+                .setSubject(authentication.getName())
                 .setIssuedAt(new Date())
                 .setExpiration(Date.from(Instant.now().plus(1, DAYS)))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -70,5 +72,13 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
         return claimsResolver.apply(claims);
+    }
+    public String getUserTypeFromJWT(String token) {
+        Claims claims =  Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.get("userType", String.class);
     }
 }
