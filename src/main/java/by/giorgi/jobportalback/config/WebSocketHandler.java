@@ -23,7 +23,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String email = extractEmail(session);
         sessions.put(email, session);
-        System.out.println(email);
     }
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
@@ -35,7 +34,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
         if (session != null && session.isOpen()) {
             try{
                 AuthResp response = new AuthResp(token);
-                System.out.println(response);
                 session.sendMessage(new TextMessage(new ObjectMapper().writeValueAsString(response)));
             }catch (IOException e) {
                 throw new RuntimeException(e);
