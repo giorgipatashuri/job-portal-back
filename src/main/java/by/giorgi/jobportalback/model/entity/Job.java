@@ -5,14 +5,15 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name="jobs")
 @Setter
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Job {
@@ -38,4 +39,7 @@ public class Job {
     @JsonManagedReference
     @OneToMany(mappedBy = "job", cascade = CascadeType.ALL)
     private List<JobApplication> applications;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
 }
