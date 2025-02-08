@@ -2,6 +2,7 @@ package by.giorgi.jobportalback.controller;
 
 import by.giorgi.jobportalback.model.dto.JobApplicationDto;
 import by.giorgi.jobportalback.model.dto.request.JobApplicationReq;
+import by.giorgi.jobportalback.model.entity.Company;
 import by.giorgi.jobportalback.model.entity.JobApplication;
 import by.giorgi.jobportalback.model.entity.User;
 import by.giorgi.jobportalback.model.enums.ApplicationStatus;
@@ -34,6 +35,11 @@ public class JobApplicationController {
     @GetMapping("/user")
     public ResponseEntity<List<JobApplicationDto>> getUserApplications(@AuthenticationPrincipal User user) {
         List<JobApplicationDto> applications = jobApplicationService.getUserApplications(user.getId());
+        return ResponseEntity.ok(applications);
+    }
+    @GetMapping("/company")
+    public ResponseEntity<List<JobApplicationDto>> getCompanyApplications(@AuthenticationPrincipal Company company) {
+        List<JobApplicationDto> applications = jobApplicationService.getCompanyApplications(company.getId());
         return ResponseEntity.ok(applications);
     }
 

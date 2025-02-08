@@ -55,6 +55,12 @@ public class JobApplicationService {
                 .map(jobApplicationMapper::toDto)
                 .collect(Collectors.toList());
     }
+    public List<JobApplicationDto> getCompanyApplications(Long companyId) {
+        List<JobApplication> applications = jobRepository.findAllApplicationsByCompanyId(companyId);
+        return applications.stream()
+                .map(jobApplicationMapper::toDto)
+                .collect(Collectors.toList());
+    }
 
     public List<JobApplicationDto> getJobApplications(Long jobId) {
         List<JobApplication> applications = jobApplicationRepository.findByJobId(jobId);
