@@ -13,6 +13,8 @@ import java.util.Optional;
 
 public interface JobApplicationRepository extends JpaRepository<JobApplication, Long> {
     List<JobApplication> findByUserId(Long userId);
+//    List<JobApplication> findByCompanyId(Long userId);
+
     List<JobApplication> findByJobId(Long jobId);
     Optional<JobApplication> findByJobIdAndCvId(Long jobId, Long cvId);
     boolean existsByJobIdAndCvId(Long jobId, Long cvId);
