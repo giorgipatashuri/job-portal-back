@@ -12,6 +12,7 @@ public class JobApplicationDto {
     private ApplicationStatus status;
     private LocalDateTime appliedAt;
     private LocalDateTime updatedAt;
+    private String coverLetter;
     private JobDto job;
     private CvDto cv;
     private UserDto user;
