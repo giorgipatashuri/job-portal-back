@@ -18,6 +18,7 @@ public class JobMapper {
         dto.setStatus(application.getStatus());
         dto.setAppliedAt(application.getAppliedAt());
         dto.setUpdatedAt(application.getUpdatedAt());
+        dto.setCoverLetter(application.getCoverLetter());
 
         // Map Job
         if (application.getJob() != null) {
